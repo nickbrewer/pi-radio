@@ -82,8 +82,8 @@ tunerknob = RotaryEncoder(UP_SWITCH,DOWN_SWITCH,MENU_SWITCH,tuner_event,revision
 ### Main routine ###
 if __name__ == "__main__":
         exec_command("service mpd start") # These lines probably  need to be moved into a different spot so it doesn't
-        exec_command("mpc clear")         # keep resetting the sound to 90 after changing the volume
-     	exec_command("mpc load mylist.pls")
+        #exec_command("mpc clear")         # keep resetting the sound to 90 after changing the volume
+     	#exec_command("mpc load mylist.pls") #The MPC Clear/Load Playlist I'm still working on, stupid permissions!
         exec_command("mpc play")          
         exec_command("mpc volume 90") 
         print "Use Ctl-C to exit"
