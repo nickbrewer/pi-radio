@@ -33,12 +33,12 @@ def finish():
     print("Radio stopped")
 
 # Switch definitions
-MENU_SWITCH = 25
-LEFT_SWITCH = 14
-RIGHT_SWITCH = 15
-UP_SWITCH = 17
-DOWN_SWITCH = 18
-MUTE_SWITCH = 4
+MENU_SWITCH = 25 #not using this, but afraid to comment it out yet
+LEFT_SWITCH = 14 #not using this, but afraid to comment it out yet
+RIGHT_SWITCH = 15 #not using this, but afraid to comment it out yet
+UP_SWITCH = 17 #not using this, but afraid to comment it out yet
+DOWN_SWITCH = 18 #not using this, but afraid to comment it out yet
+MUTE_SWITCH = 4 #not using this, but afraid to comment it out yet
 
 # Execute system command sub-routine
 def exec_command(cmd):
@@ -67,8 +67,8 @@ def tuner_event(event):
 	display_event("Tuner", event)
 	return
 
-def display_event(name,event):
-	if event == RotaryEncoder.CLOCKWISE:
+def display_event(name,event): # This is the meat of the code that I need. 
+	if event == RotaryEncoder.CLOCKWISE: # Right now I'm using it for volume, but eventually it will be used to switch to the next station
                 print name + " volume up", exec_command("mpc volume +4")
 	elif event == RotaryEncoder.ANTICLOCKWISE:
                 print name + " volume down", exec_command("mpc volume -4")
@@ -81,9 +81,11 @@ tunerknob = RotaryEncoder(UP_SWITCH,DOWN_SWITCH,MENU_SWITCH,tuner_event,revision
 
 ### Main routine ###
 if __name__ == "__main__":
-        exec_command("service mpd start")
-        exec_command("mpc play")
-        exec_command("mpc volume 90")
+        exec_command("service mpd start") # These lines probably  need to be moved into a different spot so it doesn't
+        exec_command("mpc clear")         # keep resetting the sound to 90 after changing the volume
+     	exec_command("mpc load mylist.pls")
+        exec_command("mpc play")          
+        exec_command("mpc volume 90") 
         print "Use Ctl-C to exit"
 
 	while True:
