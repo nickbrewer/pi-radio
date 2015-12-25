@@ -8,7 +8,7 @@ My plan of attack...
 Part 1
 - Get the rotary encoder to work by turning the volume up and down on one stream
 - Switch the rotary encoder over to switching between the streams
-- 
+
 Optional 
 - have rotary encoder switch cause mpc to play and stop
 
