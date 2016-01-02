@@ -30,6 +30,8 @@ encoder = gaugette.rotary_encoder.RotaryEncoder.Worker(A_PIN, B_PIN)
 encoder.start()
 
 last_state = None
+station = ""
+name = ""
 
 # Create TFT LCD display class.
 disp = TFT.ILI9341(DC, rst=RST, spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE, max_speed_hz=64000000))
@@ -45,7 +47,20 @@ def exec_command(cmd):
           result = result + line
      return result
 
-### Main routine ###
+def image():
+	if name == "http://206.190.136.141:9169/Live":
+		image = Image.open('/home/pi/Adafruit_Python_ILI9341/examples/ksua.jpg') # Load an image.								
+		disp.display(image)  # Draw the image
+	if name == "Radio":
+		image = Image.open('/home/pi/Adafruit_Python_ILI9341/examples/krua.jpg') # Load an image.		
+		image = image.rotate(90).resize((240, 320)) # Resize the image and rotate it so it's 240x320 pixels.			
+		disp.display(image)  # Draw the image
+	if name == "Rockabilly":
+		image = Image.open('/home/pi/Adafruit_Python_ILI9341/examples/cat.jpg') # Load an image.		
+		image = image.rotate(90).resize((240, 320)) # Resize the image and rotate it so it's 240x320 pixels.			
+		disp.display(image)  # Draw the image
+
+### Main routine ### 
 if __name__ == "__main__":
         exec_command("service mpd start") 
         exec_command("mpc clear")         
@@ -53,35 +68,26 @@ if __name__ == "__main__":
         exec_command("mpc play")           
         exec_command("mpc volume 100") 
         disp.clear()
+        image()
         print "Use Ctl-C to exit"
 
 while True:
-	try:	
-		station = exec_command("mpc current").split(" ")
-		name = station[0]
-		#print name  # prints the first item in mpc current
-		if name == "http://206.190.136.141:9169/Live":
-			image = Image.open('/home/pi/Adafruit_Python_ILI9341/examples/ksua.jpg') # Load an image.		
-			image = image.rotate(90).resize((240, 320)) # Resize the image and rotate it so it's 240x320 pixels.			
-			disp.display(image)  # Draw the image
-		if name == "Radio":
-			image = Image.open('/home/pi/Adafruit_Python_ILI9341/examples/krua.jpg') # Load an image.		
-			image = image.rotate(90).resize((240, 320)) # Resize the image and rotate it so it's 240x320 pixels.			
-			disp.display(image)  # Draw the image
-		if name == "Rockabilly":
-			image = Image.open('/home/pi/Adafruit_Python_ILI9341/examples/cat.jpg') # Load an image.		
-			image = image.rotate(90).resize((240, 320)) # Resize the image and rotate it so it's 240x320 pixels.			
-			disp.display(image)  # Draw the image
-			
+	try:		
 		delta = encoder.get_delta()
 		if delta == 1:
 			exec_command("mpc next")
 			print "Next"
+			station = exec_command("mpc current").split(" ")
+			name = station[0]
+			image()
 			time.sleep(0.5)
 			
 		elif delta == -1:
 			exec_command("mpc prev")
 			print "Previous"
+			station = exec_command("mpc current").split(" ")
+			name = station[0]
+			image()
 			time.sleep(0.5)	
 					
 	except KeyboardInterrupt:
