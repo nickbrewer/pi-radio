@@ -49,7 +49,8 @@ def exec_command(cmd):
 
 def image():
 	if name == "http://206.190.136.141:9169/Live":
-		image = Image.open('/home/pi/Adafruit_Python_ILI9341/examples/ksua.jpg') # Load an image.								
+		image = Image.open('/home/pi/Adafruit_Python_ILI9341/examples/ksua.jpg') # Load an image.
+		image = image.rotate(90).resize((240, 320)) # Resize the image and rotate it so it's 240x320 pixels.
 		disp.display(image)  # Draw the image
 	if name == "Radio":
 		image = Image.open('/home/pi/Adafruit_Python_ILI9341/examples/krua.jpg') # Load an image.		
