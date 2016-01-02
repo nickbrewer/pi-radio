@@ -69,7 +69,6 @@ if __name__ == "__main__":
         exec_command("mpc play")           
         exec_command("mpc volume 100") 
         disp.clear()
-        image()
         print "Use Ctl-C to exit"
 
 while True:
