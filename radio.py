@@ -1,21 +1,43 @@
-# Simple Raspberry PI Internet radio using four buttons
-import RPi.GPIO as GPIO
+# Sample code for both the RotaryEncoder class and the Switch class.
+# The common pin for the encoder should be wired to ground. 
+# The sw_pin should be shorted to ground by the switch.
+
+import gaugette.rotary_encoder
+import gaugette.switch
+import sys
+import time
+import atexit
+import traceback
+import Adafruit_GPIO as GPIO
 import os
 import atexit
 from time import sleep
+import Image
+import Adafruit_ILI9341 as TFT
+import Adafruit_GPIO.SPI as SPI
 
-# Register exit routine
-def finish():
-    exec_command("service mpd stop")
-    print("Radio stopped")
+stderr = sys.stderr.write;
 
-atexit.register(finish)
+# Image Raspberry Pi configuration. 
+DC = 22
+RST = 23
+SPI_PORT = 0
+SPI_DEVICE = 0
+A_PIN  = 29
+B_PIN  = 28
 
-# Switch definitions
-VOLUME_UP = 11
-VOLUME_DOWN = 12
-CHANNEL_UP = 15
-CHANNEL_DOWN = 16
+encoder = gaugette.rotary_encoder.RotaryEncoder.Worker(A_PIN, B_PIN)
+encoder.start()
+
+last_state = None
+station = " "
+name = " "
+
+# Create TFT LCD display class.
+disp = TFT.ILI9341(DC, rst=RST, spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE, max_speed_hz=64000000))
+
+# Initialize display.
+disp.begin()
 
 # Execute system command sub-routine
 def exec_command(cmd):
@@ -25,32 +47,60 @@ def exec_command(cmd):
           result = result + line
      return result
 
-### Main routine ###
-if __name__ == "__main__":
-     GPIO.setmode(GPIO.BOARD)
-     GPIO.setup(VOLUME_UP,GPIO.IN,pull_up_down=GPIO.PUD_DOWN)
-     GPIO.setup(VOLUME_DOWN,GPIO.IN,pull_up_down=GPIO.PUD_DOWN)
-     GPIO.setup(CHANNEL_UP,GPIO.IN,pull_up_down=GPIO.PUD_DOWN)
-     GPIO.setup(CHANNEL_DOWN,GPIO.IN,pull_up_down=GPIO.PUD_DOWN)
-     exec_command("service mpd start")
-     exec_command("mpc clear")
-     exec_command("mpc load mylist.pls")
-     exec_command("mpc play")
-     exec_command("mpc volume 70")
+def rotary():
+	delta = encoder.get_delta()
+	if delta == 1:
+		exec_command("mpc next")
+		print "Next"
+		time.sleep(0.5)
+		
+	elif delta == -1:
+		exec_command("mpc prev")
+		print "Previous"
+		time.sleep(0.5)
 
-     while True:
-          newChannel = False
-          if GPIO.input(VOLUME_UP): 
-               exec_command("mpc volume +4")
-          if GPIO.input(VOLUME_DOWN): 
-               exec_command("mpc volume -4")
-          if GPIO.input(CHANNEL_UP): 
-               exec_command("mpc next")
-               newChannel = True
-          if GPIO.input(CHANNEL_DOWN): 
-               exec_command("mpc prev")
-               newChannel = True
-          if newChannel:
-               current = exec_command("mpc current")
-               print current
-          sleep(0.2)
+def image():
+	station = exec_command("mpc current").split(" ")
+	if station[0] == "KSUA":
+		#print station[0]
+		image = Image.open('/home/pi/Adafruit_Python_ILI9341/examples/ksua.jpg') # Load an image.	
+		image = image.rotate(90).resize((240, 320)) # Resize the image and rotate it so it's 240x320 pixels.
+		print "displaying image" 							
+		disp.display(image)  # Draw the image
+		
+	elif station[0] == "Radio":
+		#print station[0]
+		image = Image.open('/home/pi/Adafruit_Python_ILI9341/examples/krua.jpg') # Load an image.		
+		image = image.rotate(90).resize((240, 320)) # Resize the image and rotate it so it's 240x320 pixels.
+		print "displaying image"			
+		disp.display(image)  # Draw the image
+		time.sleep(1.0)
+		
+	elif station[0] == "Rockabilly":
+		#print station[0]
+		image = Image.open('/home/pi/Adafruit_Python_ILI9341/examples/cat.jpg') # Load an image.		
+		image = image.rotate(90).resize((240, 320)) # Resize the image and rotate it so it's 240x320 pixels.
+		print "displaying image"			
+		disp.display(image)  # Draw the image
+		time.sleep(1.0)
+		
+
+### Main routine ### 
+if __name__ == "__main__":
+        exec_command("service mpd start") 
+        exec_command("mpc clear")         
+     	exec_command("mpc load mylist")
+        exec_command("mpc play")           
+        exec_command("mpc volume 100") 
+        disp.clear()
+        print "Use Ctl-C to exit"
+
+while True:
+	try:		
+		rotary()
+		image()
+					
+	except KeyboardInterrupt:
+		exec_command("mpc stop")
+		print "\nExit"
+		sys.exit(0)
